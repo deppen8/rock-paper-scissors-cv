@@ -22,14 +22,14 @@ def main():
         model = st.session_state["keras_model"]
     else:
         # Load the model
-        model = load_model("./models/model_v0/keras_Model.h5", compile=False)
+        model = load_model("./models/converted_keras/keras_Model.h5", compile=False)
         st.session_state["keras_model"] = model
 
     if "class_names" in st.session_state:
         class_names = st.session_state["class_names"]
     else:
         # Load the class labels
-        class_names = open("./models/model_v0/labels.txt", "r").readlines()
+        class_names = open("./models/converted_keras/labels.txt", "r").readlines()
         st.session_state["class_names"] = class_names
 
     def predict(frame: av.VideoFrame) -> av.VideoFrame:
@@ -68,8 +68,9 @@ def main():
         webrtc_ctx = webrtc_streamer(
             key="input_feed",
             mode=WebRtcMode.SENDRECV,
+            # video_frame_callback=viz_callback,
             media_stream_constraints={"video": True, "audio": False},
-            async_processing=True,
+            # async_processing=True,
         )
 
         webrtc_ctx_sendonly = webrtc_streamer(
@@ -118,7 +119,7 @@ def main():
             my_bar.progress(progress_state, text="ROCK...")
             countdown_images.image("images/rock.png", use_column_width=True)
             for text in ["PAPER...", "SCISSORS...", "SHOOT..."]:
-                time.sleep(0.75)
+                time.sleep(1.0)
                 progress_state -= 1 / 3
                 my_bar.progress(progress_state, text=text)
                 countdown_images.image(
@@ -128,6 +129,7 @@ def main():
             # countdown.image("images/shoot.png", width=500)
             time.sleep(1.5)
             my_bar.progress(0, text="SHOOT...")
+            time.sleep(2.0)
 
             countdown_images.empty()
 
