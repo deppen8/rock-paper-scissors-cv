@@ -16,21 +16,48 @@ st.set_page_config(layout="wide")
 
 
 def main():
-    st.title("Rock Paper Scissors")
+    st.radio(
+        label="Select an AI model flavor",
+        options=["Lots of training data", "KSE training data"],
+        horizontal=True,
+        key="model_flavor",
+    )
 
-    if "keras_model" in st.session_state:
-        model = st.session_state["keras_model"]
-    else:
-        # Load the model
-        model = load_model("./models/converted_keras/keras_Model.h5", compile=False)
-        st.session_state["keras_model"] = model
+    if st.session_state["model_flavor"] == "Lots of training data":
+        if "keras_model_lots_of_training_data" in st.session_state:
+            model = st.session_state["keras_model_lots_of_training_data"]
+        else:
+            # Load the model
+            model = load_model(
+                "./models/lots_of_training_data/keras_Model.h5", compile=False
+            )
+            st.session_state["keras_model_lots_of_training_data"] = model
 
-    if "class_names" in st.session_state:
-        class_names = st.session_state["class_names"]
-    else:
-        # Load the class labels
-        class_names = open("./models/converted_keras/labels.txt", "r").readlines()
-        st.session_state["class_names"] = class_names
+        if "class_names" in st.session_state:
+            class_names = st.session_state["class_names"]
+        else:
+            # Load the class labels
+            class_names = open(
+                "./models/lots_of_training_data/labels.txt", "r"
+            ).readlines()
+            st.session_state["class_names"] = class_names
+
+    elif st.session_state["model_flavor"] == "KSE training data":
+        if "keras_model_kse_training_data" in st.session_state:
+            model = st.session_state["keras_model_kse_training_data"]
+        else:
+            # Load the model
+            model = load_model(
+                "./models/kse_training_data/keras_Model.h5", compile=False
+            )
+            st.session_state["keras_model_kse_training_data"] = model
+
+        if "class_names" in st.session_state:
+            class_names = st.session_state["class_names"]
+        else:
+            # Load the class labels
+            class_names = open("./models/kse_training_data/labels.txt", "r").readlines()
+            st.session_state["class_names"] = class_names
 
     def predict(frame: av.VideoFrame) -> av.VideoFrame:
         # Create the array of the right shape to feed into the keras model
@@ -78,7 +105,7 @@ def main():
             mode=WebRtcMode.SENDONLY,
             source_video_track=webrtc_ctx.output_video_track,
             desired_playing_state=webrtc_ctx.state.playing,
-            video_receiver_size=64,
+            video_receiver_size=4,
             media_stream_constraints={"video": True, "audio": False},
         )
 
