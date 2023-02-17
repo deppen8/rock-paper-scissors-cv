@@ -110,6 +110,9 @@ def main():
         webrtc_ctx = webrtc_streamer(
             key="input_feed",
             mode=WebRtcMode.SENDRECV,
+            rtc_configuration={
+                "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+            },
             media_stream_constraints={"video": True, "audio": False},
         )
 
@@ -118,6 +121,9 @@ def main():
         webrtc_ctx_sendonly = webrtc_streamer(
             key="output_feed",
             mode=WebRtcMode.SENDONLY,
+            rtc_configuration={
+                "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+            },
             source_video_track=webrtc_ctx.output_video_track,
             desired_playing_state=webrtc_ctx.state.playing,
             video_receiver_size=4,
