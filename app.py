@@ -12,9 +12,7 @@ from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 st.set_page_config(layout="wide")
 
-base_path = Path(__file__).parents[0]
-
-st.write(Path(__file__))
+base_path = Path(__file__).parent
 
 
 def main():
@@ -33,7 +31,7 @@ def main():
         else:
             # Load the model
             model = load_model(
-                base_path / "models" / "lots_of_training_data" / "keras_Model.h5",
+                base_path / "models" / "lots_of_training_data" / "keras_model.h5",
                 compile=False,
             )
             st.session_state["keras_model_lots_of_training_data"] = model
@@ -53,7 +51,7 @@ def main():
         else:
             # Load the model
             model = load_model(
-                base_path / "models" / "little_training_data" / "keras_Model.h5",
+                base_path / "models" / "little_training_data" / "keras_model.h5",
                 compile=False,
             )
             st.session_state["keras_model_little_training_data"] = model
