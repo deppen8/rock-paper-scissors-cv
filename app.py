@@ -12,6 +12,12 @@ from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 st.set_page_config(layout="wide")
 
+st.title("Rock-Paper-Scissors-AI")
+
+st.markdown(
+    "Gameplay instructions and source code are available at [github.com/deppen8/rock-paper-scissors-cv](https://github.com/deppen8/rock-paper-scissors-cv)."
+)
+
 base_path = Path(__file__).parent
 
 
