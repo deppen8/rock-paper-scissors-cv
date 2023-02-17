@@ -4,13 +4,10 @@ import time
 import av
 import numpy as np
 import streamlit as st
-from keras.models import load_model  # TensorFlow is required for Keras to work
-from PIL import Image, ImageOps  # Install pillow instead of PIL
+from keras.models import load_model
+from PIL import Image, ImageOps
 from streamlit_extras.let_it_rain import rain
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
-
-# # Disable scientific notation for clarity
-np.set_printoptions(suppress=True)
 
 st.set_page_config(layout="wide")
 
@@ -18,11 +15,13 @@ st.set_page_config(layout="wide")
 def main():
     st.radio(
         label="Select an AI model flavor",
-        options=["Lots of training data", "KSE training data"],
+        options=["Lots of training data", "Little training data"],
         horizontal=True,
         key="model_flavor",
     )
 
+    # Logic to load the model or grab it from memory if it has already been loaded
+    # There are two model flavors, one trained on lots of data and one trained on little data
     if st.session_state["model_flavor"] == "Lots of training data":
         if "keras_model_lots_of_training_data" in st.session_state:
             model = st.session_state["keras_model_lots_of_training_data"]
@@ -42,24 +41,34 @@ def main():
             ).readlines()
             st.session_state["class_names"] = class_names
 
-    elif st.session_state["model_flavor"] == "KSE training data":
-        if "keras_model_kse_training_data" in st.session_state:
-            model = st.session_state["keras_model_kse_training_data"]
+    elif st.session_state["model_flavor"] == "Little training data":
+        if "keras_model_little_training_data" in st.session_state:
+            model = st.session_state["keras_model_little_training_data"]
         else:
             # Load the model
             model = load_model(
-                "./models/kse_training_data/keras_Model.h5", compile=False
+                "./models/little_training_data/keras_Model.h5", compile=False
             )
-            st.session_state["keras_model_kse_training_data"] = model
+            st.session_state["keras_model_little_training_data"] = model
 
         if "class_names" in st.session_state:
             class_names = st.session_state["class_names"]
         else:
             # Load the class labels
-            class_names = open("./models/kse_training_data/labels.txt", "r").readlines()
+            class_names = open(
+                "./models/little_training_data/labels.txt", "r"
+            ).readlines()
             st.session_state["class_names"] = class_names
 
-    def predict(frame: av.VideoFrame) -> av.VideoFrame:
+    def predict(frame: av.VideoFrame) -> tuple[str, float]:
+        """Run inference on a single frame.
+
+        Args:
+            frame (av.VideoFrame): A single frame from the video feed.
+
+        Returns:
+            tuple[str, float]: A class prediction string and confidence score.
+        """
         # Create the array of the right shape to feed into the keras model
         # The 'length' or number of images you can put into the array is
         # determined by the first position in the shape tuple, in this case 1
@@ -92,14 +101,15 @@ def main():
 
     col1, col2 = st.columns([4, 3], gap="medium")
     with col1:
+        # Initialize SENDRECV feed
         webrtc_ctx = webrtc_streamer(
             key="input_feed",
             mode=WebRtcMode.SENDRECV,
-            # video_frame_callback=viz_callback,
             media_stream_constraints={"video": True, "audio": False},
-            # async_processing=True,
         )
 
+        # Initialize SENDONLY feed that pulls from the SENDRECV feed
+        # This is a hack so that it is easier to grab a single frame.
         webrtc_ctx_sendonly = webrtc_streamer(
             key="output_feed",
             mode=WebRtcMode.SENDONLY,
@@ -110,6 +120,7 @@ def main():
         )
 
     with col2:
+        # Initialize some UI elements
         play_button = st.button(
             "PLAY", key="play_button", type="primary", use_container_width=True
         )
@@ -141,7 +152,8 @@ def main():
             "scissors": "images/scissors.png",
             "shoot": "images/shoot.png",
         }
-        if play_button:
+        if play_button:  # When the play button is pressed
+            # Start countdown and cycle through images
             progress_state = 1.0
             my_bar.progress(progress_state, text="ROCK...")
             countdown_images.image("images/rock.png", use_column_width=True)
@@ -153,32 +165,37 @@ def main():
                     IMAGE_PATHS[text[:-3].lower()], use_column_width=True
                 )
 
-            # countdown.image("images/shoot.png", width=500)
             time.sleep(1.5)
             my_bar.progress(0, text="SHOOT...")
             time.sleep(2.0)
 
             countdown_images.empty()
 
+            # Get a single frame from the SENDONLY feed
             if webrtc_ctx.state.playing:
                 frame = webrtc_ctx_sendonly.video_receiver.get_frame()
 
+            # Run inference on the frame
             result_class, result_confidence = predict(frame)
             st.session_state.result_class = result_class
             st.session_state.result_confidence = result_confidence
 
+            # Display the frame of the human player
             human_image = np.fliplr(frame.to_ndarray(format="rgb24"))
             human_image_box.image(human_image, use_column_width=True)
-            # randomly pick from rock, paper, scissors
+
+            # Randomly pick from rock, paper, scissors
             cpu_pick = random.choice(OBJECTS)
             cpu_image_box.image(IMAGE_PATHS[cpu_pick], use_column_width=True)
 
+            # Victory conditions
             HUMAN_WINS = [
                 ("rock", "scissors"),
                 ("paper", "rock"),
                 ("scissors", "paper"),
             ]
 
+            # Print out some output
             cpu_class_txt.header(f"CPU played {cpu_pick.upper()}")
 
             if st.session_state.result_class == cpu_pick:
@@ -200,6 +217,7 @@ def main():
 
             my_bar.progress(1.0, text="READY!")
         else:
+            # Show this before the play button is pressed
             countdown_images.image(
                 "images/rock-paper-scissors.png", use_column_width=True
             )
