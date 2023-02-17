@@ -1,0 +1,7 @@
+streamlit
+streamlit-webrtc
+streamlit-extras
+pillow
+tensorflow
+numpy
+av
