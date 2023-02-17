@@ -14,7 +14,7 @@ st.set_page_config(layout="wide")
 
 base_path = Path(__file__).parents[0]
 
-st.write(parent for parent in Path(__file__).parents[:])
+st.write(list(Path(__file__).parents))
 
 
 def main():
