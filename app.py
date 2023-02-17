@@ -12,7 +12,9 @@ from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 st.set_page_config(layout="wide")
 
-base_path = Path(__file__).parents[1]
+base_path = Path(__file__).parents[0]
+
+st.write(Path(__file__).parents)
 
 
 def main():
