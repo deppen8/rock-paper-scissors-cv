@@ -1,5 +1,6 @@
 import random
 import time
+from pathlib import Path
 
 import av
 import numpy as np
@@ -10,6 +11,8 @@ from streamlit_extras.let_it_rain import rain
 from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 st.set_page_config(layout="wide")
+
+base_path = Path(__file__).parents[1]
 
 
 def main():
@@ -28,7 +31,8 @@ def main():
         else:
             # Load the model
             model = load_model(
-                "./models/lots_of_training_data/keras_Model.h5", compile=False
+                base_path / "models" / "lots_of_training_data" / "keras_Model.h5",
+                compile=False,
             )
             st.session_state["keras_model_lots_of_training_data"] = model
 
@@ -37,7 +41,7 @@ def main():
         else:
             # Load the class labels
             class_names = open(
-                "./models/lots_of_training_data/labels.txt", "r"
+                base_path / "models" / "lots_of_training_data" / "labels.txt", "r"
             ).readlines()
             st.session_state["class_names"] = class_names
 
@@ -47,7 +51,8 @@ def main():
         else:
             # Load the model
             model = load_model(
-                "./models/little_training_data/keras_Model.h5", compile=False
+                base_path / "models" / "little_training_data" / "keras_Model.h5",
+                compile=False,
             )
             st.session_state["keras_model_little_training_data"] = model
 
@@ -56,7 +61,7 @@ def main():
         else:
             # Load the class labels
             class_names = open(
-                "./models/little_training_data/labels.txt", "r"
+                base_path / "models" / "little_training_data" / "labels.txt", "r"
             ).readlines()
             st.session_state["class_names"] = class_names
 
