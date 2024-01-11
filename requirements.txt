@@ -1,7 +1,7 @@
-streamlit==1.18.1
-streamlit-webrtc==0.44.5
-streamlit-extras==0.2.6
-pillow==9.4.0
-tensorflow==2.11.0
-numpy==1.24.2
-av==10.0.0
+streamlit==1.29.0
+streamlit-webrtc==0.47.1
+streamlit-extras==0.3.6
+pillow==10.2.0
+tensorflow>=2.11.0
+numpy>=1.24.2
+av==11.0.0
